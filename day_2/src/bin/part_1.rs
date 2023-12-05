@@ -1,6 +1,6 @@
 fn main() {
     let input = include_str!("input.txt");
-    println!("{}", input.lines().map(|l| process_one(l)).sum::<u32>());
+    println!("{}", input.lines().map(process_one).sum::<u32>());
 }
 
 fn extract_numeric(s: &str) -> u32 {

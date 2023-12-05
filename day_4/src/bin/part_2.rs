@@ -1,7 +1,7 @@
 fn main() {
     let input = include_str!("input.txt");
 
-    let mut scores = input.lines().map(|l| process_one(l)).collect::<Vec<_>>();
+    let mut scores = input.lines().map(process_one).collect::<Vec<_>>();
 
     for i in (0..scores.len()).rev() {
         scores[i] = scores[i..=i + scores[i] as usize].iter().sum::<i32>();
@@ -26,12 +26,5 @@ fn process_one(s: &str) -> i32 {
     let lhs = values(lhs);
     let rhs = values(rhs);
 
-    let mut matches = 0;
-    for v in lhs {
-        if rhs.contains(&v) {
-            matches += 1;
-        }
-    }
-
-    matches
+    lhs.into_iter().filter(|v| rhs.contains(v)).count() as i32
 }

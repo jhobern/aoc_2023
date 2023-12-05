@@ -1,7 +1,7 @@
 fn main() {
     let input = include_str!("input.txt");
 
-    println!("{}", input.lines().map(|l| process_one(l)).sum::<i32>());
+    println!("{}", input.lines().map(process_one).sum::<i32>());
 }
 
 fn values(s: &str) -> Vec<i32> {
@@ -20,16 +20,11 @@ fn process_one(s: &str) -> i32 {
     let lhs = values(lhs);
     let rhs = values(rhs);
 
-    let mut matches = 0;
-    for v in lhs {
-        if rhs.contains(&v) {
-            matches += 1;
-        }
-    }
+    let matches = lhs.into_iter().filter(|v| rhs.contains(v)).count() as u32;
 
     if matches == 0 {
         0
     } else {
-        (2 as i32).pow(matches - 1)
+        2_i32.pow(matches - 1)
     }
 }

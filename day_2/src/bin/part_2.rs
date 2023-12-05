@@ -1,6 +1,6 @@
 fn main() {
     let input = include_str!("input.txt");
-    println!("{}", input.lines().map(|l| process_one(l)).sum::<u32>());
+    println!("{}", input.lines().map(process_one).sum::<u32>());
 }
 
 fn extract_numeric(s: &str) -> u32 {
@@ -13,10 +13,8 @@ fn extract_numeric(s: &str) -> u32 {
 
 fn process_one(s: &str) -> u32 {
     let mut s = s.split(':');
-    let game = s.next().unwrap();
+    s.next().unwrap();
     let draws = s.next().unwrap().split(';');
-
-    let id = extract_numeric(game);
 
     let mut max_green = 0;
     let mut max_blue = 0;

@@ -5,7 +5,7 @@ fn main() {
 }
 
 fn process_one(s: &str) -> u32 {
-    let mut replaced = s.to_string();
+    let mut replaced = s;
     let mut digits = Vec::new();
 
     let replacements = [
@@ -28,13 +28,14 @@ fn process_one(s: &str) -> u32 {
         ("8", 8),
         ("9", 9),
     ];
+
     while !replaced.is_empty() {
         for (r, v) in replacements {
             if replaced.starts_with(r) {
                 digits.push(v);
             }
         }
-        replaced.drain(0..=0);
+        replaced = &replaced[1..];
     }
     digits[0] * 10 + digits.last().unwrap()
 }
