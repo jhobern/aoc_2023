@@ -5,7 +5,6 @@ fn main() {
         "{}",
         process(input).into_iter().map(|s| s.start).min().unwrap()
     );
-    //println!("{}", input.lines().map(|l| process_one(l)).sum::<u32>());
 }
 
 #[derive(Debug)]

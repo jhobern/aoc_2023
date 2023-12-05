@@ -2,7 +2,6 @@ fn main() {
     let input = include_str!("input.txt");
 
     println!("{}", process(input).into_iter().min().unwrap());
-    //println!("{}", input.lines().map(|l| process_one(l)).sum::<u32>());
 }
 
 #[derive(Debug)]
