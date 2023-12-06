@@ -3,11 +3,11 @@ fn main() {
     println!("{}", process(input));
 }
 
-fn extract_numbers(s: &str) -> i64 {
+fn extract_numbers(s: &str) -> f64 {
     s.chars()
         .filter(|c| c.is_numeric())
         .collect::<String>()
-        .parse::<i64>()
+        .parse::<f64>()
         .unwrap()
 }
 
@@ -18,17 +18,14 @@ fn process(s: &str) -> i64 {
     let distance = extract_numbers(lines.next().unwrap());
 
     //The distance that the boat travels is t_charge * (t_total - t_charge)
-    //Substituting t_charge = (t_total - t_charge)
-    //We find: (t_total - t_charge) * (t_total - (t_total - t_charge)) is the distance
-    //which is the same as (t_total - t_charge) * t_charge
-    //So we just need to find the first point at which the boat exceeds the record,
-    //And then the last time it exceeds the record will be at (t_total - t_charge), and all
-    //times in between will be what we are after
-    for i in 0..time {
-        if i * (time - i) > distance {
-            return time - i * 2 + 1;
-        }
-    }
+    //Putting this equal to distance lets us find the intercept numerically,
+    //t_charge ^ 2 - t_total * t_charge + d = 0
+    //Quadratic formula => t_charge = (t_total +/- (t_total^2 - 4 * distance).sqrt()) / 2
+    //The distance between these points is the total number of distances that win
 
-    0
+    let negative_soln = ((time - (time * time - 4. * distance).sqrt()) / 2.).ceil() as i64;
+    let positive_soln = ((time + (time * time - 4. * distance).sqrt()) / 2.).floor() as i64;
+
+    //add 1 for the fencepost error
+    positive_soln - negative_soln + 1
 }
