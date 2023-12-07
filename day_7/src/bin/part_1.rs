@@ -12,29 +12,15 @@ struct Hand {
     hand_type: HandType,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, PartialOrd)]
 enum HandType {
-    FiveOfAKind,
-    FourOfAKind,
-    FullHouse,
-    ThreeOfAKind,
-    TwoPair,
-    OnePair,
-    HighCard,
-}
-
-impl HandType {
-    fn to_val(&self) -> i32 {
-        match self {
-            HandType::FiveOfAKind => 7,
-            HandType::FourOfAKind => 6,
-            HandType::FullHouse => 5,
-            HandType::ThreeOfAKind => 4,
-            HandType::TwoPair => 3,
-            HandType::OnePair => 2,
-            HandType::HighCard => 1,
-        }
-    }
+    FiveOfAKind = 7,
+    FourOfAKind = 6,
+    FullHouse = 5,
+    ThreeOfAKind = 4,
+    TwoPair = 3,
+    OnePair = 2,
+    HighCard = 1,
 }
 
 fn card_to_val(c: char) -> i32 {
@@ -53,12 +39,6 @@ fn card_to_val(c: char) -> i32 {
         '3' => 3,
         '2' => 2,
         _ => 0,
-    }
-}
-
-impl PartialOrd for HandType {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.to_val().partial_cmp(&other.to_val())
     }
 }
 
