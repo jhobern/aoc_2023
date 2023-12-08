@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use num::integer::lcm;
+
 fn main() {
     let input = include_str!("input.txt");
     println!("{}", process(input));
@@ -19,28 +21,6 @@ fn get_directions(s: &str) -> Vec<Direction> {
             _ => None,
         })
         .collect()
-}
-
-fn lcm(first: i64, second: i64) -> i64 {
-    first * second / gcd(first, second)
-}
-
-fn gcd(first: i64, second: i64) -> i64 {
-    let mut max = first;
-    let mut min = second;
-    if min > max {
-        std::mem::swap(&mut max, &mut min);
-    }
-
-    loop {
-        let res = max % min;
-        if res == 0 {
-            return min;
-        }
-
-        max = min;
-        min = res;
-    }
 }
 
 fn process(s: &str) -> i64 {
