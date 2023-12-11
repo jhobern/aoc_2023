@@ -49,10 +49,13 @@ fn add((a, b): (i64, i64), (x, y): (i64, i64)) -> (i64, i64) {
 
 fn shoelace_formula_area(points: &[(i64, i64)]) -> i64 {
     // Weird cross product magic to give the area of a polygon
-    (1..points.len() - 1)
+    // If the points are clockwise the area is positive, but if the points
+    // are counterclockwise the area is negative, hence the `abs()`
+    ((1..points.len() - 1)
         .map(|i| points[i].0 * (points[i + 1].1 - points[i - 1].1))
         .sum::<i64>()
-        / 2
+        / 2)
+    .abs()
 }
 
 fn picks_theorem(points: &[(i64, i64)]) -> i64 {
