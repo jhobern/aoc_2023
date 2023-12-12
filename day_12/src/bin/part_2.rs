@@ -104,9 +104,8 @@ fn combinations(row: SpringRow) -> usize {
 fn parse_input(s: &str) -> Vec<SpringRow> {
     s.lines()
         .map(|line| {
-            let mut line = line.split(' ');
+            let (springs, contiguous_broken_streaks) = line.split_once(' ').unwrap();
 
-            let springs = line.next().unwrap();
             let springs = format!("{springs}?");
             let mut springs = springs.repeat(5);
             springs.pop();
@@ -120,9 +119,7 @@ fn parse_input(s: &str) -> Vec<SpringRow> {
                 })
                 .collect();
 
-            let contiguous_broken_streaks = line
-                .next()
-                .unwrap()
+            let contiguous_broken_streaks = contiguous_broken_streaks
                 .split(',')
                 .map(|n| n.parse::<usize>().unwrap())
                 .collect::<Vec<_>>()
