@@ -21,26 +21,26 @@ struct SpringRow {
 type T<'a> = (usize, usize, usize, bool);
 
 fn worker(
-    memoised_table: &mut HashMap<T, usize>,
+    cache: &mut HashMap<T, usize>,
     springs: &[Spring],
-    current_brokens_remaining_in_streak: usize,
+    brokens_remaining: usize,
     brokens: &[usize],
     just_finished_a_broken_streak: bool,
 ) -> usize {
     let key = (
         springs.len(),
-        current_brokens_remaining_in_streak,
+        brokens_remaining,
         brokens.len(),
         just_finished_a_broken_streak,
     );
-    if let Some(v) = memoised_table.get(&key) {
+    if let Some(v) = cache.get(&key) {
         return *v;
     }
 
     let mut value = 0;
 
     if springs.is_empty() {
-        if current_brokens_remaining_in_streak != 0 || !brokens.is_empty() {
+        if brokens_remaining != 0 || !brokens.is_empty() {
             value = 0;
         } else {
             value = 1;
@@ -48,41 +48,29 @@ fn worker(
     } else if just_finished_a_broken_streak {
         value = match springs[0] {
             Spring::Broken => 0,
-            _ => worker(
-                memoised_table,
-                &springs[1..],
-                current_brokens_remaining_in_streak,
-                brokens,
-                false,
-            ),
+            _ => worker(cache, &springs[1..], brokens_remaining, brokens, false),
         };
-    } else if current_brokens_remaining_in_streak > 0 {
+    } else if brokens_remaining > 0 {
         value = if springs[0] == Spring::Fixed {
             0
         } else {
             worker(
-                memoised_table,
+                cache,
                 &springs[1..],
-                current_brokens_remaining_in_streak - 1,
+                brokens_remaining - 1,
                 brokens,
-                current_brokens_remaining_in_streak == 1,
+                brokens_remaining == 1,
             )
         };
-    } else if current_brokens_remaining_in_streak == 0 {
+    } else if brokens_remaining == 0 {
         value = match springs[0] {
-            Spring::Fixed => worker(
-                memoised_table,
-                &springs[1..],
-                current_brokens_remaining_in_streak,
-                brokens,
-                false,
-            ),
+            Spring::Fixed => worker(cache, &springs[1..], brokens_remaining, brokens, false),
             Spring::Broken => {
                 if brokens.is_empty() {
                     0
                 } else {
                     worker(
-                        memoised_table,
+                        cache,
                         &springs[1..],
                         brokens[0] - 1,
                         &brokens[1..],
@@ -92,33 +80,22 @@ fn worker(
             }
             Spring::Unknown => {
                 if brokens.is_empty() {
-                    worker(
-                        memoised_table,
-                        &springs[1..],
-                        current_brokens_remaining_in_streak,
-                        brokens,
-                        false,
-                    )
+                    worker(cache, &springs[1..], brokens_remaining, brokens, false)
                 } else {
-                    worker(
-                        memoised_table,
-                        &springs[1..],
-                        current_brokens_remaining_in_streak,
-                        brokens,
-                        false,
-                    ) + worker(
-                        memoised_table,
-                        &springs[1..],
-                        brokens[0] - 1,
-                        &brokens[1..],
-                        brokens[0] == 1,
-                    )
+                    worker(cache, &springs[1..], brokens_remaining, brokens, false)
+                        + worker(
+                            cache,
+                            &springs[1..],
+                            brokens[0] - 1,
+                            &brokens[1..],
+                            brokens[0] == 1,
+                        )
                 }
             }
         };
     }
 
-    memoised_table.insert(key, value);
+    cache.insert(key, value);
 
     value
 }
