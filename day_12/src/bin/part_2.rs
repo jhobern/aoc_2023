@@ -18,7 +18,7 @@ struct SpringRow {
     contiguous_broken_streaks: Vec<usize>,
 }
 
-type T<'a> = (Vec<Spring>, usize, Vec<usize>, bool);
+type T<'a> = (usize, usize, usize, bool);
 
 fn worker(
     memoised_table: &mut HashMap<T, usize>,
@@ -28,9 +28,9 @@ fn worker(
     just_finished_a_broken_streak: bool,
 ) -> usize {
     let key = (
-        springs.to_vec(),
+        springs.len(),
         current_brokens_remaining_in_streak,
-        brokens.to_vec(),
+        brokens.len(),
         just_finished_a_broken_streak,
     );
     if let Some(v) = memoised_table.get(&key) {
