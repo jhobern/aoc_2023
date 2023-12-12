@@ -106,9 +106,7 @@ fn parse_input(s: &str) -> Vec<SpringRow> {
         .map(|line| {
             let (springs, contiguous_broken_streaks) = line.split_once(' ').unwrap();
 
-            let springs = format!("{springs}?");
-            let mut springs = springs.repeat(5);
-            springs.pop();
+            let springs = [springs].repeat(5).join("?");
             let springs: Vec<Spring> = springs
                 .chars()
                 .map(|c| match c {
