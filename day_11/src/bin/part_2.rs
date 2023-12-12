@@ -38,12 +38,10 @@ fn dilate(mut galaxies: Vec<Galaxy>, width: i64, height: i64, scale_factor: i64)
 
 fn parse(s: &str) -> (Vec<Galaxy>, (i64, i64)) {
     let mut galaxies = Vec::new();
-    let mut width = 0;
-    let mut height = 0;
+    let height = s.lines().count();
+    let width = s.len() / height;
     for (y, line) in s.lines().enumerate() {
-        height = y + 1;
         for (x, c) in line.chars().enumerate() {
-            width = x + 1;
             if c == '#' {
                 galaxies.push(Galaxy {
                     x: x as i64,
