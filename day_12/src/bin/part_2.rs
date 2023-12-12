@@ -49,16 +49,15 @@ fn worker(
             _ => worker(cache, &springs[1..], brokens_remaining, brokens, false),
         }
     } else if brokens_remaining > 0 {
-        if springs[0] == Spring::Fixed {
-            0
-        } else {
-            worker(
+        match springs[0] {
+            Spring::Fixed => 0,
+            _ => worker(
                 cache,
                 &springs[1..],
                 brokens_remaining - 1,
                 brokens,
                 brokens_remaining == 1,
-            )
+            ),
         }
     } else if brokens_remaining == 0 {
         let (fixed, broken) = match springs[0] {
@@ -67,25 +66,21 @@ fn worker(
             Spring::Unknown => (true, true),
         };
 
-        let fixed = if fixed {
-            worker(cache, &springs[1..], brokens_remaining, brokens, false)
-        } else {
-            0
-        };
-
-        let broken = if broken && !brokens.is_empty() {
-            worker(
+        let mut total = 0;
+        if fixed {
+            total += worker(cache, &springs[1..], brokens_remaining, brokens, false);
+        }
+        if broken && !brokens.is_empty() {
+            total += worker(
                 cache,
                 &springs[1..],
                 brokens[0] - 1,
                 &brokens[1..],
                 brokens[0] == 1,
-            )
-        } else {
-            0
-        };
+            );
+        }
 
-        fixed + broken
+        total
     } else {
         unreachable!()
     };
