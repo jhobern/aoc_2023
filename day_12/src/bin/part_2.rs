@@ -37,21 +37,19 @@ fn worker(
         return *v;
     }
 
-    let mut value = 0;
-
-    if springs.is_empty() {
+    let value = if springs.is_empty() {
         if brokens_remaining != 0 || !brokens.is_empty() {
-            value = 0;
+            0
         } else {
-            value = 1;
+            1
         }
     } else if just_finished_a_broken_streak {
-        value = match springs[0] {
+        match springs[0] {
             Spring::Broken => 0,
             _ => worker(cache, &springs[1..], brokens_remaining, brokens, false),
-        };
+        }
     } else if brokens_remaining > 0 {
-        value = if springs[0] == Spring::Fixed {
+        if springs[0] == Spring::Fixed {
             0
         } else {
             worker(
@@ -61,39 +59,36 @@ fn worker(
                 brokens,
                 brokens_remaining == 1,
             )
-        };
+        }
     } else if brokens_remaining == 0 {
-        value = match springs[0] {
-            Spring::Fixed => worker(cache, &springs[1..], brokens_remaining, brokens, false),
-            Spring::Broken => {
-                if brokens.is_empty() {
-                    0
-                } else {
-                    worker(
-                        cache,
-                        &springs[1..],
-                        brokens[0] - 1,
-                        &brokens[1..],
-                        brokens[0] == 1,
-                    )
-                }
-            }
-            Spring::Unknown => {
-                if brokens.is_empty() {
-                    worker(cache, &springs[1..], brokens_remaining, brokens, false)
-                } else {
-                    worker(cache, &springs[1..], brokens_remaining, brokens, false)
-                        + worker(
-                            cache,
-                            &springs[1..],
-                            brokens[0] - 1,
-                            &brokens[1..],
-                            brokens[0] == 1,
-                        )
-                }
-            }
+        let (fixed, broken) = match springs[0] {
+            Spring::Fixed => (true, false),
+            Spring::Broken => (false, true),
+            Spring::Unknown => (true, true),
         };
-    }
+
+        let fixed = if fixed {
+            worker(cache, &springs[1..], brokens_remaining, brokens, false)
+        } else {
+            0
+        };
+
+        let broken = if broken && !brokens.is_empty() {
+            worker(
+                cache,
+                &springs[1..],
+                brokens[0] - 1,
+                &brokens[1..],
+                brokens[0] == 1,
+            )
+        } else {
+            0
+        };
+
+        fixed + broken
+    } else {
+        unreachable!()
+    };
 
     cache.insert(key, value);
 
