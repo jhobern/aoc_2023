@@ -25,25 +25,25 @@ fn worker(
     springs: &[Spring],
     brokens_remaining: usize,
     brokens: &[usize],
-    just_finished_a_broken_streak: bool,
+    just_finished_broken_streak: bool,
 ) -> usize {
     let key = (
         springs.len(),
         brokens_remaining,
         brokens.len(),
-        just_finished_a_broken_streak,
+        just_finished_broken_streak,
     );
     if let Some(v) = cache.get(&key) {
         return *v;
     }
 
     let value = if springs.is_empty() {
-        if brokens_remaining != 0 || !brokens.is_empty() {
-            0
-        } else {
+        if brokens_remaining == 0 && brokens.is_empty() {
             1
+        } else {
+            0
         }
-    } else if just_finished_a_broken_streak {
+    } else if just_finished_broken_streak {
         match springs[0] {
             Spring::Broken => 0,
             _ => worker(cache, &springs[1..], brokens_remaining, brokens, false),
@@ -131,6 +131,5 @@ fn parse_input(s: &str) -> Vec<SpringRow> {
 }
 
 fn process(s: &str) -> usize {
-    let input = parse_input(s);
-    input.into_iter().map(combinations).sum()
+    parse_input(s).into_iter().map(combinations).sum()
 }
