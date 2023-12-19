@@ -28,53 +28,26 @@ impl Filter {
     fn split_parts(&self, part: &Part) -> (Part, Part) {
         let mut accepted_part = part.clone();
         let mut rejected_part = part.clone();
+        fn getter<'a>(part: &'a mut Part, attribute: &Attribute) -> &'a mut (usize, usize) {
+            match attribute {
+                Attribute::X => &mut part.x,
+                Attribute::M => &mut part.m,
+                Attribute::A => &mut part.a,
+                Attribute::S => &mut part.s,
+                Attribute::None => unreachable!(),
+            }
+        }
 
-        match self.attribute {
-            Attribute::X => match self.filter {
-                FilterFunc::Always => {}
-                FilterFunc::Gt(n) => {
-                    accepted_part.x.0 = n + 1;
-                    rejected_part.x.1 = n;
-                }
-                FilterFunc::Lt(n) => {
-                    accepted_part.x.1 = n - 1;
-                    rejected_part.x.0 = n;
-                }
-            },
-            Attribute::M => match self.filter {
-                FilterFunc::Always => {}
-                FilterFunc::Gt(n) => {
-                    accepted_part.m.0 = n + 1;
-                    rejected_part.m.1 = n;
-                }
-                FilterFunc::Lt(n) => {
-                    accepted_part.m.1 = n - 1;
-                    rejected_part.m.0 = n;
-                }
-            },
-            Attribute::A => match self.filter {
-                FilterFunc::Always => {}
-                FilterFunc::Gt(n) => {
-                    accepted_part.a.0 = n + 1;
-                    rejected_part.a.1 = n;
-                }
-                FilterFunc::Lt(n) => {
-                    accepted_part.a.1 = n - 1;
-                    rejected_part.a.0 = n;
-                }
-            },
-            Attribute::S => match self.filter {
-                FilterFunc::Always => {}
-                FilterFunc::Gt(n) => {
-                    accepted_part.s.0 = n + 1;
-                    rejected_part.s.1 = n;
-                }
-                FilterFunc::Lt(n) => {
-                    accepted_part.s.1 = n - 1;
-                    rejected_part.s.0 = n;
-                }
-            },
-            Attribute::None => {}
+        match self.filter {
+            FilterFunc::Always => {}
+            FilterFunc::Gt(n) => {
+                getter(&mut accepted_part, &self.attribute).0 = n + 1;
+                getter(&mut rejected_part, &self.attribute).1 = n
+            }
+            FilterFunc::Lt(n) => {
+                getter(&mut accepted_part, &self.attribute).1 = n - 1;
+                getter(&mut rejected_part, &self.attribute).0 = n
+            }
         };
 
         (accepted_part, rejected_part)
@@ -219,7 +192,6 @@ fn process(s: &str) -> usize {
 
             match &condition.destination {
                 Destination::Accept => {
-                    //sum += width(part.x) * width(part.m) * width(part.a) * width(part.s);
                     accepted_ranges.push(accepted_part);
                 }
                 Destination::Reject => {}
