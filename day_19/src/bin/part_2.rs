@@ -1,5 +1,5 @@
 fn main() {
-    let input = include_str!("part1_test.txt");
+    let input = include_str!("input.txt");
     println!("{}", process(input));
 }
 
@@ -156,25 +156,21 @@ fn parse_workflow(s: &str) -> WorkFlow {
     }
 }
 
-fn parse_part(_: &str) -> Part {
-    Part {
+fn parse_input(s: &str) -> Vec<WorkFlow> {
+    let (workflows, _) = s.split_once("\n\n").unwrap();
+    let workflows = workflows.lines().map(parse_workflow);
+
+    workflows.collect()
+}
+
+fn process(s: &str) -> usize {
+    let workflows = parse_input(s);
+    let total_part = Part {
         x: (1, 4000),
         m: (1, 4000),
         a: (1, 4000),
         s: (1, 4000),
-    }
-}
-
-fn parse_input(s: &str) -> (Vec<WorkFlow>, Vec<Part>) {
-    let (workflows, parts) = s.split_once("\n\n").unwrap();
-    let workflows = workflows.lines().map(parse_workflow);
-    let parts = parts.lines().map(parse_part);
-
-    (workflows.collect(), parts.collect())
-}
-
-fn process(s: &str) -> usize {
-    let (workflows, parts) = parse_input(s);
+    };
 
     let mut workflow_part_pairs: Vec<(WorkFlow, Part)> = vec![(
         workflows
@@ -182,7 +178,7 @@ fn process(s: &str) -> usize {
             .find(|workflow| &workflow.name == "in")
             .unwrap()
             .clone(),
-        parts[0].clone(),
+        total_part,
     )];
 
     let mut accepted_ranges = Vec::new();
