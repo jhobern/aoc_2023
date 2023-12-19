@@ -177,7 +177,6 @@ fn process(s: &str) -> i64 {
                     match &condition.destination {
                         Destination::Accept => {
                             processed = true;
-                            dbg!(part.x);
                             sum += part.x + part.m + part.a + part.s;
                         }
                         Destination::Reject => processed = true,
