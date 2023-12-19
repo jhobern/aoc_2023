@@ -11,6 +11,7 @@ enum Attribute {
     S,
     None,
 }
+
 #[derive(Clone)]
 struct Filter {
     attribute: Attribute,
@@ -66,6 +67,7 @@ struct Condition {
     filter: Filter,
     destination: Destination,
 }
+
 #[derive(Clone)]
 struct WorkFlow {
     name: String,
