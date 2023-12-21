@@ -50,7 +50,7 @@ impl Components {
         drop(queue);
         if let Some(signal) = signal {
             if self.rx_parents.contains(&signal.destination)
-                && signal.signal_type == SignalType::High
+                && signal.signal_type != SignalType::High
             {
                 self.parent_values
                     .insert(signal.destination, self.curr_button_press);
