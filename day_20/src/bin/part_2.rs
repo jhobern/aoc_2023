@@ -27,13 +27,16 @@ impl SignalType {
     }
 }
 
+#[derive(Default)]
 struct Components {
     low_pulses: usize,
     high_pulses: usize,
     components: HashMap<usize, Box<dyn Receiver>>,
     signal_queue: Rc<RefCell<SignalQueue>>,
     rx_count: usize,
-    rx_id: usize,
+    rx_parents: Vec<usize>,
+    parent_values: HashMap<usize, usize>,
+    curr_button_press: usize,
 }
 
 impl Components {
@@ -46,8 +49,11 @@ impl Components {
         let signal = queue.next();
         drop(queue);
         if let Some(signal) = signal {
-            if signal.signal_type == SignalType::Low && signal.destination == self.rx_id {
-                self.rx_count += 1;
+            if self.rx_parents.contains(&signal.destination)
+                && signal.signal_type == SignalType::High
+            {
+                self.parent_values
+                    .insert(signal.destination, self.curr_button_press);
             }
             match signal.signal_type {
                 SignalType::High => self.high_pulses += 1,
@@ -69,14 +75,16 @@ impl Components {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct SignalQueue {
     signals: Vec<Signal>,
+    signal_count: usize,
 }
 
 impl SignalQueue {
     fn push_signal(&mut self, signal: Signal) {
         self.signals.push(signal);
+        self.signal_count += 1;
     }
 
     fn next(&mut self) -> Option<Signal> {
@@ -92,6 +100,8 @@ trait Receiver: std::fmt::Debug {
     fn receive(&mut self, signal: Signal);
 
     fn add_input(&mut self, input_name: usize);
+
+    fn state(&self) -> SignalType;
 }
 
 #[derive(Debug)]
@@ -116,6 +126,10 @@ impl Receiver for BroadCaster {
     }
 
     fn add_input(&mut self, _input_name: usize) {}
+
+    fn state(&self) -> SignalType {
+        SignalType::High
+    }
 }
 
 #[derive(Debug)]
@@ -145,6 +159,10 @@ impl Receiver for FlipFlop {
     }
 
     fn add_input(&mut self, _input_name: usize) {}
+
+    fn state(&self) -> SignalType {
+        self.state.clone()
+    }
 }
 
 struct Conjuction {
@@ -172,12 +190,9 @@ impl Receiver for Conjuction {
     fn receive(&mut self, signal: Signal) {
         *self.inputs.get_mut(&signal.source).unwrap() = signal.signal_type.clone();
 
-        let signal_type = if self.inputs.values().all(|value| *value == SignalType::High) {
-            SignalType::Low
-        } else {
-            SignalType::High
-        };
+        let signal_type = self.state();
         let mut queue = self.signal_queue.borrow_mut();
+
         for &destination in &self.destinations {
             queue.push_signal(Signal {
                 destination,
@@ -190,17 +205,27 @@ impl Receiver for Conjuction {
     fn add_input(&mut self, input_name: usize) {
         self.inputs.insert(input_name, SignalType::Low);
     }
+
+    fn state(&self) -> SignalType {
+        if self.inputs.values().all(|value| *value == SignalType::High) {
+            SignalType::Low
+        } else {
+            SignalType::High
+        }
+    }
 }
 
 fn parse_input(s: &str) -> (Components, Rc<RefCell<SignalQueue>>, HashMap<String, usize>) {
     let signal_queue = SignalQueue {
         signals: Vec::new(),
+        signal_count: 0,
     };
     let signal_reference = Rc::new(RefCell::new(signal_queue));
 
     let mut inputs = HashMap::new();
     let mut names = HashMap::new();
     let mut curr_name = 0;
+    let mut rx_feed_ins = Vec::new();
 
     for line in s.lines() {
         let (mut component, outputs) = line.split_once(" -> ").unwrap();
@@ -221,15 +246,11 @@ fn parse_input(s: &str) -> (Components, Rc<RefCell<SignalQueue>>, HashMap<String
         }
     }
 
-    let rx_id = *names.get("rx").unwrap();
+    let qb_id = *names.get("qb").unwrap();
 
     let mut components = Components {
-        components: HashMap::new(),
         signal_queue: signal_reference.clone(),
-        low_pulses: 0,
-        high_pulses: 0,
-        rx_count: 0,
-        rx_id,
+        ..Default::default()
     };
 
     for line in s.lines() {
@@ -287,20 +308,24 @@ fn parse_input(s: &str) -> (Components, Rc<RefCell<SignalQueue>>, HashMap<String
 
     for (source, output_list) in inputs {
         for output in output_list {
+            if output == qb_id {
+                rx_feed_ins.push(source);
+            }
             components.add_input(&output, source);
         }
     }
+
+    components.rx_parents = rx_feed_ins;
 
     (components, signal_reference, names)
 }
 
 fn process(s: &str) -> usize {
-    //Technically working.... If you let it run forever
     let (mut components, queue, names) = parse_input(s);
 
     let broadcast_id = *names.get("broadcaster").unwrap();
-
     for i in 0.. {
+        components.curr_button_press = i + 1;
         components.rx_count = 0;
         queue.borrow_mut().push_signal(Signal {
             destination: broadcast_id,
@@ -308,10 +333,10 @@ fn process(s: &str) -> usize {
             signal_type: SignalType::Low,
         });
         while components.tick() {}
-        if components.rx_count == 1 {
-            return i;
+        if components.parent_values.len() == components.rx_parents.len() {
+            return components.parent_values.values().product();
         }
     }
 
-    todo!()
+    components.high_pulses * components.low_pulses
 }
