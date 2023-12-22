@@ -41,7 +41,7 @@ fn parse_input(s: &str) -> Vec<Vec<bool>> {
 // 472831 -> 156238    -> 31230
 //
 // Which shows that the values for n extra `board_width`s above the third value, 97808, will be given by:
-// 97807 + (62548 + 31230) + (62548 + 31230 + 31230) + (62548 + 31230 + 31230 + 31230) + ...+ (62548 + 31230 * n)
+// 97807 + (62548 + 31230) + (62548 + 31230 + 31230) + (62548 + 31230 + 31230 + 31230) + ... + (62548 + 31230 * n)
 // which reduces to:
 // 97807 + (62548 * n) + (31230 * (n + 1) * n / 2)
 //
