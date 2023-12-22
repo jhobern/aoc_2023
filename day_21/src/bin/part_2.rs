@@ -82,14 +82,9 @@ fn process(s: &str) -> u128 {
         for (x, row) in curr_garden.iter().enumerate().take(width) {
             for (y, &element) in row.iter().enumerate().take(height) {
                 if element {
-                    for p in [
-                        (y as i64 - 1, x as i64),
-                        (y as i64 + 1, x as i64),
-                        (y as i64, x as i64 - 1),
-                        (y as i64, x as i64 + 1),
-                    ] {
-                        if is_in_garden(p) {
-                            new_garden[p.1 as usize][p.0 as usize] = curr_garden[x][y];
+                    for p in [(y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)] {
+                        if is_in_garden((p.0 as i64, p.1 as i64)) {
+                            new_garden[p.1][p.0] = curr_garden[x][y];
                         }
                     }
                 }
